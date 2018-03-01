@@ -1,0 +1,36 @@
+ 
+# In Restore_backup file from "Detaching And Attaching the Volumes" section
+
+**
+Stop = ec2.stop_instances(
+                InstanceIds=[iid]
+                )
+time.sleep(sleep_value)
+state = ""
+while state == 'ok':
+    time.sleep(5)
+    status = ec2.describe_instance_status(InstanceIds=[iid])
+    state = status['InstanceStatuses'][0]['InstanceStatus']['Status']
+logging.info('The %s volume %s is being deattached:' % (vtype, nvid))
+**
+
+For the above code after sleep 8th statement, you're defining state with "ok" and using state variable in while loop. This will never executed 
+in any circumstatnces.
+And also You're not confirming the system is properly in 'shutdown'.
+
+
+You can replace the above code with the below code
+**
+Stop = ec2.stop_instances(
+                InstanceIds=[iid]
+                )
+
+ec2.get_waiter('instance_stopped').wait(
+    DryRun=False,
+    InstanceIds=[iid]
+)
+logging.info('The %s volume %s is being deattached:' % (vtype, nvid))
+**
+
+
+
